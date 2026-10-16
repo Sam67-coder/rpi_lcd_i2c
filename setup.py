@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="rpi-lcd-i2c",                     
-    version="1.0.1",                  
+    name="rpi_lcd_i2c",                     
+    version="2.0.0",                  
     description="HD44780 I2C LCD driver for Raspberry Pi (Bookworm)",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
