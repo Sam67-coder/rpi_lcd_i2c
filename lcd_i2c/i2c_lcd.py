@@ -9,29 +9,53 @@ SHIFT_DATA = 4
 
 class I2cLcd(LcdApi):
 
-    def __init__(self, i2c_bus, i2c_addr, num_lines, num_columns):
-        self.bus = SMBus(i2c_bus)
-        self.addr = i2c_addr
+    def __init__(
+   	 self,
+   	 i2c_bus=None,
+   	 i2c_addr=None,
+   	 num_lines=None,
+   	 num_columns=None,
+   	 *,
+   	 bus=None,
+   	 address=None,
+   	 rows=None,
+   	 cols=None
+):
+    # Allow both naming styles
+   	 i2c_bus = i2c_bus if i2c_bus is not None else bus
+   	 i2c_addr = i2c_addr if i2c_addr is not None else address
+   	 num_lines = num_lines if num_lines is not None else rows
+   	 num_columns = num_columns if num_columns is not None else cols
 
-        self.bus.write_byte(self.addr, 0x00)
-        time.sleep(0.02)
+   	 if None in (i2c_bus, i2c_addr, num_lines, num_columns):
+       		 raise TypeError(
+           	 "I2cLcd requires bus/address/rows/cols "
+           	 "(or i2c_bus/i2c_addr/num_lines/num_columns)"
+        )
 
-        self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
-        time.sleep(0.005)
-        self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
-        time.sleep(0.001)
-        self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
-        time.sleep(0.001)
+   	 self.bus = SMBus(i2c_bus)
+   	 self.addr = i2c_addr
 
-        self.hal_write_init_nibble(self.LCD_FUNCTION)
-        time.sleep(0.001)
+   	 self.bus.write_byte(self.addr, 0x00)
+   	 time.sleep(0.02)
 
-        super().__init__(num_lines, num_columns)
+   	 self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
+   	 time.sleep(0.005)
+   	 self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
+   	 time.sleep(0.001)
+   	 self.hal_write_init_nibble(self.LCD_FUNCTION_RESET)
+   	 time.sleep(0.001)
 
-        cmd = self.LCD_FUNCTION
-        if num_lines > 1:
-            cmd |= self.LCD_FUNCTION_2LINES
-        self.hal_write_command(cmd)
+   	 self.hal_write_init_nibble(self.LCD_FUNCTION)
+   	 time.sleep(0.001)
+	
+   	 super().__init__(num_lines, num_columns)
+
+   	 cmd = self.LCD_FUNCTION
+   	 if num_lines > 1:
+       		 cmd |= self.LCD_FUNCTION_2LINES
+   	 self.hal_write_command(cmd)
+
 
     def hal_write_init_nibble(self, nibble):
         byte = ((nibble >> 4) & 0x0F) << SHIFT_DATA
@@ -60,4 +84,3 @@ class I2cLcd(LcdApi):
         self.bus.write_byte(self.addr, high)
         self.bus.write_byte(self.addr, low | MASK_E)
         self.bus.write_byte(self.addr, low)
-
